@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "e-commerce"
+version = "0.1.0"
+description = "Assesment of e-commerce received from FERRO.AI."
+authors = ["shahuji <vshahu47@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+django = "4.2"
+djangorestframework = "^3.14.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
