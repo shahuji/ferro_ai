@@ -4,8 +4,8 @@ from rest_framework.authtoken.models import Token
 from rest_framework.decorators import authentication_classes
 from rest_framework.response import Response
 
-from .models import Product
-from products.serializers import ProductSerializer, UserSerializer, UserLoginSerializer
+from .models import Product, Cart
+from products.serializers import ProductSerializer, UserSerializer, UserLoginSerializer, CartSerializer
 
 from django.contrib.auth import get_user_model
 
@@ -54,3 +54,30 @@ class UserLogin(generics.CreateAPIView):
             return Response({'token': user.auth_token.key}, status=status.HTTP_200_OK)
 
         return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+class CartCreate(generics.CreateAPIView):
+    queryset = Cart.objects.all()
+    serializer_class = CartSerializer
+
+
+class CartUpdate(generics.UpdateAPIView):
+    queryset = Cart.objects.all()
+    serializer_class = CartSerializer
+
+
+class CartView(generics.ListAPIView):
+    serializer_class = CartSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        return Cart.objects.filter(user=user)
+
+
+class CartClear(generics.DestroyAPIView):
+    queryset = Cart.objects.all()
+    serializer_class = CartSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        return Cart.objects.filter(user=user)

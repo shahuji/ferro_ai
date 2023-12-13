@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Product
+from .models import Product, Cart
 
 from django.contrib.auth import authenticate, get_user_model
 
@@ -43,3 +43,9 @@ class UserLoginSerializer(serializers.Serializer):
 
         data['user'] = user
         return data
+
+
+class CartSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cart
+        fields = '__all__'
