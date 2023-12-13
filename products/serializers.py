@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Product, Cart
+from .models import Product, Cart, Order
 
 from django.contrib.auth import authenticate, get_user_model
 
@@ -27,7 +27,7 @@ class UserLoginSerializer(serializers.Serializer):
         email = data.get('email')
         password = data.get('password')
 
-        if not User.objects.filter(email=email).exists():
+        if not User.objects.filter(email=email, is_superuser=False).exists():
             raise serializers.ValidationError('Invalid email or password.')
         else:
             email = User.objects.filter(email=email).first().username
@@ -48,4 +48,10 @@ class UserLoginSerializer(serializers.Serializer):
 class CartSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cart
+        fields = '__all__'
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
         fields = '__all__'

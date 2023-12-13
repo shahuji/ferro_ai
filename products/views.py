@@ -1,13 +1,14 @@
 from rest_framework.authentication import TokenAuthentication
 from rest_framework import generics, permissions, status
 from rest_framework.authtoken.models import Token
-from rest_framework.decorators import authentication_classes
 from rest_framework.response import Response
 
-from .models import Product, Cart
-from products.serializers import ProductSerializer, UserSerializer, UserLoginSerializer, CartSerializer
+from .permissions import IsStaffUser
+from .models import Product, Cart, Order
+from products.serializers import ProductSerializer, UserSerializer, UserLoginSerializer, CartSerializer, OrderSerializer
 
 from django.contrib.auth import get_user_model
+
 
 User = get_user_model()
 
@@ -59,19 +60,35 @@ class UserLogin(generics.CreateAPIView):
 class CartCreate(generics.CreateAPIView):
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
+    authentication_classes = [TokenAuthentication]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class CartList(generics.ListCreateAPIView):
+    queryset = Cart.objects.all()
+    serializer_class = CartSerializer
+    authentication_classes = [TokenAuthentication]
+
+    def get_queryset(self):
+        user = self.request.user
+        return self.queryset.filter(user=user)
 
 
 class CartUpdate(generics.UpdateAPIView):
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
+    authentication_classes = [TokenAuthentication]
 
 
 class CartView(generics.ListAPIView):
     serializer_class = CartSerializer
+    authentication_classes = [TokenAuthentication]
 
     def get_queryset(self):
         user = self.request.user
-        return Cart.objects.filter(user=user)
+        return self.queryset.filter(user=user)
 
 
 class CartClear(generics.DestroyAPIView):
@@ -81,3 +98,37 @@ class CartClear(generics.DestroyAPIView):
     def get_queryset(self):
         user = self.request.user
         return Cart.objects.filter(user=user)
+
+
+class OrderCreateView(generics.CreateAPIView):
+    serializer_class = OrderSerializer
+    authentication_classes = [TokenAuthentication]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user, status='Placed')
+
+
+class OrderDetailView(generics.RetrieveAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+    authentication_classes = [TokenAuthentication]
+
+
+class OrderList(generics.ListCreateAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+    authentication_classes = [TokenAuthentication]
+
+    def get_queryset(self):
+        user = self.request.user
+        if not user.is_staff:
+            return self.queryset.filter(user=user)
+        else:
+            return self.queryset.filter(status='Reached Nearest Hub')
+
+
+class OrderUpdateView(generics.UpdateAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsStaffUser]
