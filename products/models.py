@@ -38,7 +38,7 @@ class Order(models.Model):
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    products = models.ManyToManyField(Product, through='Cart')
+    product = models.ForeignKey(Product, through='Cart')
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     delivery_address = models.TextField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Placed')
